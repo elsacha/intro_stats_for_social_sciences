@@ -59,12 +59,8 @@ relfreqSatjob
 - Joint count barplot
 
 ```{r fig.width = 4, fig.height= 4}
-#par(mar=c(7,4,4,4))
-#reinitialize relative frequencies tables without totatls
-totalfreqSatjob <- joint$t
-joint_plot <- barplot(totalfreqSatjob, beside=TRUE, col = rainbow(4), 
-                      xlab = "", ylab = "Frequency", las = 2)
-legend("topright",  legend = levels(data$satjob), pch=15, col=rainbow(4), cex=.5)
+library(ggplot2)
+ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
 ```
 
 - Joint relative frequency barplots per level of satisfaction
@@ -156,4 +152,22 @@ Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey, 1972-2
 
 - A modified version of the survey (taken from another statistics class) was used for the purposes of this study.
 
+```{r}
+library(ggplot2)
+counts <- ggplot(data=data, aes(x=degree, y=satjob)) + geom_bar(stat="identity")
+
+counts_per_degree <- ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
+
+rel_very_satisfied <- ggplot(data, aes(x=degree, y=satjob))+ geom_bar(stat="identity",position='dodge')
+ggplot(data, aes(x=degree))+geom_density()
+
+
+ggplot(data, aes(satjob)) +
+    geom_bar(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x])))) +
+    facet_wrap(~degree) 
+
+library(reshape)
+data.melt <- melt(data, id=c("degree"))
+ggplot(data.melt, aes(x=degree, y=value)) + geom_bar(stat="identity")
+```
 
