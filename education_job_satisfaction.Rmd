@@ -1,0 +1,159 @@
+---
+title: "Study of a possible association between level of education and job satisfaction"
+date: June 2015
+output:
+  html_document:
+    theme: cerulean
+---
+### Introduction:
+
+Some people believe that a higher academic degree leads to a more satisfying work . A lively discussion is going on concerning this issue. This project puts this belief to a test by examining data from the General Social Survey (GSS). 
+
+We try to explore a possible correlation between the respondent's highest educational degree and the level of satisfaction with the job he/she obtained later.
+
+### Data:
+The data represents a random sample of the US population. The cases are randomly selected individuals from the US population.
+
+For the purposes of our study we will examine the following variables: **'satjob'** (On the whole, how satisfied are you with the work you do?) and **'degree'** (degree obtained by the respondents). Both variables are categorical and ordinal. The levels of 'satjob' can be ordered in the following decreasing order (Very Satisfied, Mod. satisfied, A Little Dissatisfied, Very Dissatisfied). The levels of 'degree' can be ordered in the increasing order as follows: Less Than High School, High School, Junior College, Bachelor, Graduate).
+
+It is an observational study. Respondents were randomly selected from the US population. For this reason, the findings **can be generalized to the entire population**. Since this is an observational study and not an experiment (with random assignment to groups), **only a correlation** (association) can be established between the variables, **not a causal link**.
+
+```{r}
+load("statistics-project-gss.Rdata")
+rawData <- nrow(subset(gss, !is.na(satjob)&!is.na(degree)))#40672
+rawData <- cbind(gss["satjob"], gss["degree"])
+```
+
+### Exploratory data analysis:
+- Number of rows with missing values (NA): **`r nrow(rawData)`**. We decided to drop NA values.
+```{r}
+data <- subset(rawData, !is.na(satjob) & !is.na(degree))
+nrow(data)
+```
+Number of rows without missing values: **`r nrow(data)`** (rows lost: **`r nrow(rawData) - nrow(data)`**). Roughly 25% of data is lost. I will assume that NA values are randomly distributed and that no bias is introduced. It must be noted that it would be difficult to impute such a large number of missing values without introducing a bias. With this understanding, I decided to procede with a new data set which represents roughly 75% of the original data set and does not contain NA values.
+
+- Contingency table - Total frequency per income
+```{r results = "hide"}
+library(gmodels)
+joint <- CrossTable(data$satjob, data$degree)
+```
+
+```{r}
+totalfreqSatjob <- joint$t
+rowtotals <- as.vector(rowSums(totalfreqSatjob))
+totalfreqSatjob <- cbind(totalfreqSatjob, rowtotals)
+coltotals <- as.vector(colSums(totalfreqSatjob))
+totalfreqSatjob <- rbind(totalfreqSatjob, coltotals)
+totalfreqSatjob
+```
+The numbers of respondents belonging to each income group is not equal, hence it makes more sense to consider relative frequencies and not total counts.
+
+- Contingency table - Relative frequency per income
+
+```{r}
+relfreqSatjob <- joint$prop.col
+relfreqSatjob
+```
+
+
+- Joint count barplot
+
+```{r fig.width = 4, fig.height= 4}
+#par(mar=c(7,4,4,4))
+#reinitialize relative frequencies tables without totatls
+totalfreqSatjob <- joint$t
+joint_plot <- barplot(totalfreqSatjob, beside=TRUE, col = rainbow(4), 
+                      xlab = "", ylab = "Frequency", las = 2)
+legend("topright",  legend = levels(data$satjob), pch=15, col=rainbow(4), cex=.5)
+```
+
+- Joint relative frequency barplots per level of satisfaction
+
+```{r echo=1:7}
+par(mfrow = c(2,2)) # set layout 2 rows and 2 columns
+#Plot 1 - Very satisfied
+very_satisfied <- barplot(relfreqSatjob[1,], col = rainbow(5), main = "Very satisfied",
+                             axes = FALSE, axisnames = FALSE)
+#rotate x-axis labels 45 degrees and reduce their size so that all labels would fit
+text(very_satisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
+
+#plot 2 - Modestly satisfied 
+mod_satisfied <- barplot(relfreqSatjob[2,], col = rainbow(5), main = "Modestly satisfied",
+                         axes = FALSE, axisnames = FALSE)
+#rotate x-axis labels 45 degrees and reduce their size so that all labels would fit
+text(mod_satisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
+#plot 3 - A little dissatisfied
+little_dissatisfied <- barplot(relfreqSatjob[3,], col = rainbow(5), main = "A Little Dissatisfied", 
+                   axes = FALSE, axisnames = FALSE)
+text(little_dissatisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
+
+
+#plot 4 - Very Dissatisfied
+very_dissatisfied <- barplot(relfreqSatjob[4,], col = rainbow(5), main = "Very dissatisfied",
+                         axes = FALSE, axisnames = FALSE)
+text(very_dissatisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
+
+```
+
+
+
+### Inference:
+We have two categorical variables each of which has more than two levels. In this situation we use a **chi-squared independence test**.
+
+- Null hypothesis -  H0 = job satisfaction and degree are independent
+- Alternative hypothesis - Ha = job satisfaction and degree are dependent
+
+- Conditions for chi-squared independence test
+1. **Independence**. Sampled observations are independent since the sample is random, the sample represents less than 10% of the population and each case only contributes to one cell in the table.
+2. **Sample size**. Each particular scenario (cell) has at least 5 expected cases. 
+
+**First we will perform a chi-squared independence test manually and then apply the R function.**
+- Compute the expected values:
+```{r}
+tbl <- table(data$satjob, data$degree); expected <- tbl
+for (i in 1:4) {
+  for (j in 1:5){expected[i,j] <- round(sum(tbl[i,]*sum(tbl[,j])/sum(tbl)), 0)}}
+```
+
+```{r echo = FALSE, results= "hide"}
+rowSums(tbl)
+rowSums(expected)
+colSums(tbl)
+colSums(expected)
+```
+
+
+
+```{r echo = FALSE}
+expected
+```
+- Compute chi-squared:
+```{r}
+chi_sq <- sum((tbl-expected)^2/expected); chi_sq #tbl contains observed values
+```
+- Degrees of freedom: `(4-1)*(5-1)` = `r (4-1)*(5-1)`, p-value: 
+```{r}
+pchisq(chi_sq, 12, lower.tail = FALSE)
+```
+**P-value is close to zero, we reject the null hypothesis**
+
+**Now we will compare this result with the result of the R's `chisq.test` function.**
+```{r}
+chisq.test(tbl)
+```
+p-value is far less than 0.05 at 95% significance level. **We reject the null hypothesis**.
+
+
+
+### Conclusion:
+We **reject the null hypothesis** that the level of job satisfaction and academic degree are independent and **accept the alternative hypothesis** - these variables are dependent. There might be a **positive correlation** between the level of degree and job satisfaction (i.e. respondents with a higher degree seem to be more satisfied with their work). Though, **we cannot conlcude that there is a casual link** since this is an observational study and not an experiment. It might be interesting to conduct a **further study** on other  possible factors contributing to the satisfaction at work (for example, level of happiness, optimism, pessimism, etc).
+
+### References
+- Data citation
+Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey, 1972-2012 [Cumulative File]. ICPSR34802-v1. Storrs, CT: Roper Center for Public Opinion Research, University of Connecticut /Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributors], 2013-09-11. doi:10.3886/ICPSR34802.v1
+
+- Persistent URL: http://doi.org/10.3886/ICPSR34802.v1
+
+- A modified version of the survey (taken from another statistics class) was used for the purposes of this study.
+
+
