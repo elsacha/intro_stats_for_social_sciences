@@ -65,30 +65,10 @@ ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + fac
 
 - Joint relative frequency barplots per level of satisfaction
 
-```{r echo=1:7}
-par(mfrow = c(2,2)) # set layout 2 rows and 2 columns
-#Plot 1 - Very satisfied
-very_satisfied <- barplot(relfreqSatjob[1,], col = rainbow(5), main = "Very satisfied",
-                             axes = FALSE, axisnames = FALSE)
-#rotate x-axis labels 45 degrees and reduce their size so that all labels would fit
-text(very_satisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
-
-#plot 2 - Modestly satisfied 
-mod_satisfied <- barplot(relfreqSatjob[2,], col = rainbow(5), main = "Modestly satisfied",
-                         axes = FALSE, axisnames = FALSE)
-#rotate x-axis labels 45 degrees and reduce their size so that all labels would fit
-text(mod_satisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
-#plot 3 - A little dissatisfied
-little_dissatisfied <- barplot(relfreqSatjob[3,], col = rainbow(5), main = "A Little Dissatisfied", 
-                   axes = FALSE, axisnames = FALSE)
-text(little_dissatisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
-
-
-#plot 4 - Very Dissatisfied
-very_dissatisfied <- barplot(relfreqSatjob[4,], col = rainbow(5), main = "Very dissatisfied",
-                         axes = FALSE, axisnames = FALSE)
-text(very_dissatisfied, par("usr")[3], labels = levels(data$degree), srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=.9); axis(2)
-
+```{r}
+df_rel = as.data.frame(relfreqSatjob)
+colnames(df_rel) = c("Satisfaction", "Degree", "Frequency")
+ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity", fill="#FF9999", colour="blue") + facet_wrap(~Satisfaction)+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 
@@ -153,21 +133,28 @@ Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey, 1972-2
 - A modified version of the survey (taken from another statistics class) was used for the purposes of this study.
 
 ```{r}
-library(ggplot2)
-counts <- ggplot(data=data, aes(x=degree, y=satjob)) + geom_bar(stat="identity")
-
-counts_per_degree <- ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
-
-rel_very_satisfied <- ggplot(data, aes(x=degree, y=satjob))+ geom_bar(stat="identity",position='dodge')
-ggplot(data, aes(x=degree))+geom_density()
-
-
-ggplot(data, aes(satjob)) +
-    geom_bar(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x])))) +
-    facet_wrap(~degree) 
-
-library(reshape)
-data.melt <- melt(data, id=c("degree"))
-ggplot(data.melt, aes(x=degree, y=value)) + geom_bar(stat="identity")
+# library(ggplot2)
+# counts <- ggplot(data=data, aes(x=degree, y=satjob)) + geom_bar(stat="identity")
+# 
+# counts_per_degree <- ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
+# 
+# rel_very_satisfied <- ggplot(data, aes(x=degree, y=satjob))+ geom_bar(stat="identity",position='dodge')
+# ggplot(data, aes(x=degree))+geom_density()
+# 
+# 
+# ggplot(data, aes(satjob)) +
+#     geom_bar(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x])))) +
+#     facet_wrap(~degree) 
+# 
+# df_rel = as.data.frame(relfreqSatjob)
+# colnames(df_rel) = c("Satisfaction", "Degree", "Frequency")
+# lt_hs_rel = subset(df_rel, Degree=="Lt High School")
+# ggplot(data=lt_hs_rel, aes(x=Satisfaction, y=Frequency)) + geom_bar(stat="identity") #+ facet_wrap(~Satisfaction)
+# ggplot(data=df_rel, aes(x=Satisfaction, y=Frequency)) + geom_bar(stat="identity") + facet_wrap(~Degree)
+# ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity") + facet_wrap(~Satisfaction)
+# 
+# library(reshape)
+# data.melt <- melt(data, id=c("degree"))
+# ggplot(data.melt, aes(x=degree, y=value)) + geom_bar(stat="identity")
 ```
 
