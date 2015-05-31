@@ -61,7 +61,7 @@ relfreqSatjob
 
 ```{r fig.width = 4, fig.height= 4, echo=FALSE}
 library(ggplot2)
-ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
+ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 - Joint relative frequency barplots per level of satisfaction
@@ -69,7 +69,7 @@ ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + fac
 ```{r echo=FALSE}
 df_rel = as.data.frame(relfreqSatjob)
 colnames(df_rel) = c("Satisfaction", "Degree", "Frequency")
-ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity", fill="#FF9999", colour="blue") + facet_wrap(~Satisfaction)+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity", fill="#FF9999", colour="blue") + facet_wrap(~Satisfaction) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 From the above plots, first of all we conclude that most of the respondents are either very satisfied or moderately satisfied with their work (roughly, 80%). The level of satisfaction grows slightly as the level of degree increases (for example, in the "Very Satisfied" group). And inversely the level of dissatisfaction decreases (in "A Little Dissatisfied" and "Very Dissatisfied" groups), although the decrease is not very significant
