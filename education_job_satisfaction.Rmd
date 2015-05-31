@@ -18,27 +18,28 @@ For the purposes of our study we will examine the following variables: **'satjob
 
 It is an observational study. Respondents were randomly selected from the US population. For this reason, the findings **can be generalized to the entire population**. Since this is an observational study and not an experiment (with random assignment to groups), **only a correlation** (association) can be established between the variables, **not a causal link**.
 
-```{r}
+```{r echo=FALSE}
 load("statistics-project-gss.Rdata")
 rawData <- nrow(subset(gss, !is.na(satjob)&!is.na(degree)))#40672
 rawData <- cbind(gss["satjob"], gss["degree"])
 ```
 
 ### Exploratory data analysis:
-- Number of rows with missing values (NA): **`r nrow(rawData)`**. We decided to drop NA values.
-```{r}
+I will use the statistical software R to conduct this analysis.
+
+Some of the rows in the data set contain missing values (NA - not available).
+```{r echo=FALSE}
 data <- subset(rawData, !is.na(satjob) & !is.na(degree))
-nrow(data)
 ```
 Number of rows without missing values: **`r nrow(data)`** (rows lost: **`r nrow(rawData) - nrow(data)`**). Roughly 25% of data is lost. I will assume that NA values are randomly distributed and that no bias is introduced. It must be noted that it would be difficult to impute such a large number of missing values without introducing a bias. With this understanding, I decided to procede with a new data set which represents roughly 75% of the original data set and does not contain NA values.
 
 - Contingency table - Total frequency per income
-```{r results = "hide"}
+```{r echo=FALSE, results = "hide"}
 library(gmodels)
 joint <- CrossTable(data$satjob, data$degree)
 ```
 
-```{r}
+```{r echo=FALSE}
 totalfreqSatjob <- joint$t
 rowtotals <- as.vector(rowSums(totalfreqSatjob))
 totalfreqSatjob <- cbind(totalfreqSatjob, rowtotals)
@@ -50,7 +51,7 @@ The numbers of respondents belonging to each income group is not equal, hence it
 
 - Contingency table - Relative frequency per income
 
-```{r}
+```{r echo=FALSE}
 relfreqSatjob <- joint$prop.col
 relfreqSatjob
 ```
@@ -58,22 +59,25 @@ relfreqSatjob
 
 - Joint count barplot
 
-```{r fig.width = 4, fig.height= 4}
+```{r fig.width = 4, fig.height= 4, echo=FALSE}
 library(ggplot2)
 ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
 ```
 
 - Joint relative frequency barplots per level of satisfaction
 
-```{r}
+```{r echo=FALSE}
 df_rel = as.data.frame(relfreqSatjob)
 colnames(df_rel) = c("Satisfaction", "Degree", "Frequency")
 ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity", fill="#FF9999", colour="blue") + facet_wrap(~Satisfaction)+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+From the above plots, first of all we conclude that most of the respondents are either very satisfied or moderately satisfied with their work (roughly, 80%). The level of satisfaction grows slightly as the level of degree increases (for example, in the "Very Satisfied" group). And inversely the level of dissatisfaction decreases (in "A Little Dissatisfied" and "Very Dissatisfied" groups), although the decrease is not very significant
 
 
 ### Inference:
+Let us see if our observation based on visual examination of data is statistically significant.
+
 We have two categorical variables each of which has more than two levels. In this situation we use a **chi-squared independence test**.
 
 - Null hypothesis -  H0 = job satisfaction and degree are independent
@@ -83,9 +87,10 @@ We have two categorical variables each of which has more than two levels. In thi
 1. **Independence**. Sampled observations are independent since the sample is random, the sample represents less than 10% of the population and each case only contributes to one cell in the table.
 2. **Sample size**. Each particular scenario (cell) has at least 5 expected cases. 
 
-**First we will perform a chi-squared independence test manually and then apply the R function.**
+**First we will perform a chi-squared independence test manually and then apply the function integrated in R function.**
+The manual calculation is done purely to review the procedure.
 - Compute the expected values:
-```{r}
+```{r echo=FALSE}
 tbl <- table(data$satjob, data$degree); expected <- tbl
 for (i in 1:4) {
   for (j in 1:5){expected[i,j] <- round(sum(tbl[i,]*sum(tbl[,j])/sum(tbl)), 0)}}
@@ -117,7 +122,7 @@ pchisq(chi_sq, 12, lower.tail = FALSE)
 ```{r}
 chisq.test(tbl)
 ```
-p-value is far less than 0.05 at 95% significance level. **We reject the null hypothesis**.
+The R's chisq.test function produces approximately the same results: p-value is far less than 0.05 at 95% significance level. **We reject the null hypothesis**.
 
 
 
