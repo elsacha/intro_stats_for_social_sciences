@@ -1,15 +1,16 @@
 ---
 title: "Study of a possible association between level of education and job satisfaction"
-date: June 2015
 output:
   html_document:
     theme: cerulean
+  pdf_document: default
+date: "June 2015"
 ---
 ### Introduction:
 
-Some people believe that a higher academic degree leads to a more satisfying work . A lively discussion is going on concerning this issue. This project puts this belief to a test by examining data from the General Social Survey (GSS). 
+Some people believe that a higher academic degree leads to a more satisfying work. A lively discussion is going on concerning this issue. This project puts this belief to a test by examining data from the General Social Survey (GSS). 
 
-We try to explore a possible correlation between the respondent's highest educational degree and the level of satisfaction with the job he/she obtained later.
+We try to explore a possible correlation between the respondent's highest educational degree and the level of satisfaction with the job he/she obtained.
 
 ### Data:
 The data represents a random sample of the US population. The cases are randomly selected individuals from the US population.
@@ -25,13 +26,13 @@ rawData <- cbind(gss["satjob"], gss["degree"])
 ```
 
 ### Exploratory data analysis:
-I will use the statistical software R to conduct this analysis.
+I will use the statistical software R to conduct this analysis. However, I will perform a step by step calculation of the statistical test and compare it with the corresponding function provided by R.
 
 Some of the rows in the data set contain missing values (NA - not available).
 ```{r echo=FALSE}
 data <- subset(rawData, !is.na(satjob) & !is.na(degree))
 ```
-Number of rows without missing values: **`r nrow(data)`** (rows lost: **`r nrow(rawData) - nrow(data)`**). Roughly 25% of data is lost. I will assume that NA values are randomly distributed and that no bias is introduced. It must be noted that it would be difficult to impute such a large number of missing values without introducing a bias. With this understanding, I decided to procede with a new data set which represents roughly 75% of the original data set and does not contain NA values.
+Number of rows without missing values (NA - not available): **`r nrow(data)`** (rows lost: **`r nrow(rawData) - nrow(data)`**). I decided to delete the rows of data containing NA values (roughly 25% of data will be lost). I will assume that NA values are randomly distributed and that no bias is introduced. It must be noted that it would be difficult to impute such a large number of missing values without introducing a bias. With this understanding, I decided to procede with a new data set which represents roughly 75% of the original data set and does not contain NA values.
 
 - Contingency table - Total frequency per income
 ```{r echo=FALSE, results = "hide"}
@@ -72,7 +73,7 @@ colnames(df_rel) = c("Satisfaction", "Degree", "Frequency")
 ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity", fill="#FF9999", colour="blue") + facet_wrap(~Satisfaction) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-From the above plots, first of all we conclude that most of the respondents are either very satisfied or moderately satisfied with their work (roughly, 80%). The level of satisfaction grows slightly as the level of degree increases (for example, in the "Very Satisfied" group). And inversely the level of dissatisfaction decreases (in "A Little Dissatisfied" and "Very Dissatisfied" groups), although the decrease is not very significant
+From the above plots, first of all we conclude that most of the respondents are either very satisfied or moderately satisfied with their work (roughly, 80%). The level of satisfaction grows slightly as the level of degree increases (for example, in the "Very Satisfied" group).
 
 
 ### Inference:
@@ -87,7 +88,7 @@ We have two categorical variables each of which has more than two levels. In thi
 1. **Independence**. Sampled observations are independent since the sample is random, the sample represents less than 10% of the population and each case only contributes to one cell in the table.
 2. **Sample size**. Each particular scenario (cell) has at least 5 expected cases. 
 
-**First we will perform a chi-squared independence test manually and then apply the function integrated in R function.**
+**First we will perform a chi-squared independence test manually and then apply the function integrated in R.**
 The manual calculation is done purely to review the procedure.
 - Compute the expected values:
 ```{r echo=FALSE}
@@ -135,31 +136,10 @@ Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey, 1972-2
 
 - Persistent URL: http://doi.org/10.3886/ICPSR34802.v1
 
-- A modified version of the survey (taken from another statistics class) was used for the purposes of this study.
+- A modified version of the survey was used for the purposes of this study taken fromthe [Data Analysis and Statistical Inference class](https://www.coursera.org/course/statistics). Link to [download data](http://bit.ly/dasi_gss_data). An html version of this study can be found [here](http://rpubs.com/elsacha/88384).
 
-```{r}
-# library(ggplot2)
-# counts <- ggplot(data=data, aes(x=degree, y=satjob)) + geom_bar(stat="identity")
-# 
-# counts_per_degree <- ggplot(data=data, aes(x=degree)) + geom_bar(fill="#FF9999", colour="blue") + facet_wrap(~satjob)
-# 
-# rel_very_satisfied <- ggplot(data, aes(x=degree, y=satjob))+ geom_bar(stat="identity",position='dodge')
-# ggplot(data, aes(x=degree))+geom_density()
-# 
-# 
-# ggplot(data, aes(satjob)) +
-#     geom_bar(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x])))) +
-#     facet_wrap(~degree) 
-# 
-# df_rel = as.data.frame(relfreqSatjob)
-# colnames(df_rel) = c("Satisfaction", "Degree", "Frequency")
-# lt_hs_rel = subset(df_rel, Degree=="Lt High School")
-# ggplot(data=lt_hs_rel, aes(x=Satisfaction, y=Frequency)) + geom_bar(stat="identity") #+ facet_wrap(~Satisfaction)
-# ggplot(data=df_rel, aes(x=Satisfaction, y=Frequency)) + geom_bar(stat="identity") + facet_wrap(~Degree)
-# ggplot(data=df_rel, aes(x=Degree, y=Frequency)) + geom_bar(stat="identity") + facet_wrap(~Satisfaction)
-# 
-# library(reshape)
-# data.melt <- melt(data, id=c("degree"))
-# ggplot(data.melt, aes(x=degree, y=value)) + geom_bar(stat="identity")
-```
+
+
+
+
 
